@@ -12,6 +12,9 @@ H2database user-defined functions that is compatible with functions of Oracle.
 * BIN_TO_NUM
 * COMPOSE
 * DBTIMEZONE
+* LAST_DAY
+* MONTHS_BETWEEN
+* NEXT_DAY
 
 ##implemented on h2
 * ABS
@@ -50,6 +53,7 @@ H2database user-defined functions that is compatible with functions of Oracle.
 * MAX
 * MIN
 * MOD
+* NULLIF
 * NVL
 * NVL2
 * POWER
@@ -127,7 +131,6 @@ H2database user-defined functions that is compatible with functions of Oracle.
 * ITERATION_NUMBER
 * LAG
 * LAST
-* LAST_DAY
 * LAST_VALUE
 * LEAD
 * LISTAGG
@@ -135,11 +138,9 @@ H2database user-defined functions that is compatible with functions of Oracle.
 * LOCALTIMESTAMP
 * MAKE_REF
 * MEDIAN
-* MONTHS_BETWEEN
 * NANVL
 * NCHR
 * NEW_TIME
-* NEXT_DAY
 * NLS_CHARSET_DECL_LEN
 * NLS_CHARSET_ID
 * NLS_CHARSET_NAME
@@ -149,7 +150,6 @@ H2database user-defined functions that is compatible with functions of Oracle.
 * NLSSORT
 * NTH_VALUE
 * NTILE
-* NULLIF
 * NUMTODSINTERVAL
 * NUMTOYMINTERVAL
 * ORA_DST_AFFECTED
