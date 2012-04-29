@@ -2,9 +2,12 @@ package org.guess880.h2_oracle_funcs;
 
 import java.math.BigDecimal;
 import java.text.Normalizer;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalDateTime.Property;
 import org.joda.time.Period;
@@ -62,23 +65,8 @@ public class OracleFunctions {
 
     // TODO omit the parentheses
     public static final String dbTimeZone() {
-        final StringBuilder buffer = new StringBuilder();
-        double value = (double) TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 3600000;
-//        double value = TimeZone.getDefault().getRawOffset() / 3600000; TODO which?
-        double absval = value < 0 ? -value : value;
-        String hour = Integer.toString((int) (absval * 10 / 10));
-        String minute = Integer.toString((int) (absval % 1 * 60));
-        buffer.append(value >= 0 ? "+" : "-");
-        if (hour.length() == 1) {
-            buffer.append("0");
-        }
-        buffer.append(hour);
-        buffer.append(":");
-        if (minute.length() == 1) {
-            buffer.append("0");
-        }
-        buffer.append(minute);
-        return buffer.toString();
+        return new DateTime(DateTimeZone.forTimeZone(TimeZone.getDefault()))
+                .toString("ZZ");
     }
 
     // canonical only
@@ -86,11 +74,13 @@ public class OracleFunctions {
 //        return Normalizer.normalize(exp, Normalizer.Form.NFD);
 //    }
 
+    // TODO support implicit type conversion of date.
     public static final Date lastDay(final Date date) {
         return new LocalDateTime(date.getTime()).dayOfMonth().withMaximumValue().toDate();
     }
 
-    // return type is ok?
+    // TODO return type is ok?
+    // TODO support implicit type conversion of date.
     public static final double monthsBetween(final Date date1, final Date date2) {
         final Period period = new Period(
                 new LocalDateTime(date2.getTime()),
@@ -110,6 +100,7 @@ public class OracleFunctions {
 
     // TODO if day is illegal, what to do
     // TODO oracle day
+    // TODO support implicit type conversion of date.
     public static final Date nextDay(final Date date, final String day) {
         LocalDateTime next = null;
         final LocalDateTime ldt = new LocalDateTime(date.getTime());
@@ -125,4 +116,147 @@ public class OracleFunctions {
         return next.toDate();
     }
 
+    // remainder
+
+    public static final String sessionTimeZone() {
+        return dbTimeZone();
+    }
+
+    public static final String tranlate(final String expr, final String from, final String to) {
+        String ret = expr.replace("''", "'");
+        String nfrom = from.replace("''", "'");
+        char cf;
+        for (int i = 0; i < nfrom.length(); i++) {
+            cf = nfrom.charAt(i);
+            if (i < to.length()) {
+                ret = ret.replace(cf, to.charAt(i));
+            } else {
+                ret = ret.replace(String.valueOf(cf), "");
+            }
+        }
+        return ret;
+    }
+
+//    public static final double trunc(final double n1, final int n2) {
+//        double f = Math.pow(10., n2);
+//        double g = n1 * f;
+//        return (n1 < 0) ? Math.ceil(g) : Math.floor(g) / f;
+//    }
+//
+//    public static final double trunc(final double n1) {
+//        return trunc(n1, 0);
+//    }
+//
+//    private static final Date trunc(final Date date, final String fmt) {
+//        final String ufmt = fmt.toUpperCase(Locale.ENGLISH);
+//        if ("CC".equals(ufmt) || "SCC".equals(ufmt)) {
+//            // 4桁の年号の上2桁より1大きい数
+//        } else if ("SYYYY".equals(ufmt)
+//                || "YYYY".equals(ufmt)
+//                || "YEAR".equals(ufmt)
+//                || "SYEAR".equals(ufmt)
+//                || "YYY".equals(ufmt)
+//                || "YY".equals(ufmt)
+//                || "Y".equals(ufmt)) {
+//            // 年(7月1日に切上げ)
+//        } else if ("IYYY".equals(ufmt)
+//                || "IY".equals(ufmt)
+//                || "IY".equals(ufmt)
+//                || "I".equals(ufmt)) {
+//            // ISO年
+//        } else if ("Q".equals(ufmt)) {
+//            // 四半期(その四半期の2番目の月の16日に切上げ)
+//        } else if ("MONTH".equals(ufmt)
+//                || "MON".equals(ufmt)
+//                || "MM".equals(ufmt)
+//                || "RM".equals(ufmt)) {
+//            // 月(16日に切上げ)
+//        } else if ("WW".equals(ufmt)) {
+//            // 年の最初の日と同じ曜日
+//        } else if ("IW".equals(ufmt)) {
+//            // ISO週の最初の日と同じ曜日(月曜日)
+//        } else if ("W".equals(ufmt)) {
+//            // 月の最初の日と同じ曜日
+//        } else if ("DDD".equals(ufmt)
+//                || "DD".equals(ufmt)
+//                || "J".equals(ufmt)) {
+//            // 日
+//        } else if ("DAY".equals(ufmt)
+//                || "DY".equals(ufmt)
+//                || "D".equals(ufmt)) {
+//            // 週の開始日
+//        } else if ("HH".equals(ufmt)
+//                || "HH12".equals(ufmt)
+//                || "HH24".equals(ufmt)) {
+//            // 時
+//        } else if ("MI".equals(ufmt)) {
+//            // 分
+//        } else {
+//        }
+//        return null;
+//    }
+//
+//    public static final Date trunc(final Date date) {
+//        return trunc(date, "DD");
+//    }
+
+    public static final String unistr(final String string) {
+        final StringBuilder sb = new StringBuilder();
+        char c;
+        char[] cs = string.toCharArray();
+        int i = 0;
+        while (i < cs.length) {
+            c = cs[i];
+            if (c == '\\') {
+                sb.append(hexToStr(Arrays.copyOfRange(cs, i + 1, i + 5)));
+                i = i + 5;
+            } else {
+                sb.append(c);
+                i = i + 1;
+            }
+        }
+        return sb.toString();
+    }
+
+    private static final String hexToStr(char[] in) {
+        char c;
+        int value = 0;
+        for (int i = 0; i < 4; i++) {
+            c = in[i];
+            switch (c) {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                value = (value << 4) + c - '0';
+                break;
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'e':
+            case 'f':
+                value = (value << 4) + 10 + c - 'a';
+                break;
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+            case 'E':
+            case 'F':
+                value = (value << 4) + 10 + c - 'A';
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Malformed \\uxxxx encoding.");
+            }
+        }
+        return String.valueOf((char) value);
+    }
 }

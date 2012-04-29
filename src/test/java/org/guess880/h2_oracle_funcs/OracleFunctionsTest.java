@@ -14,7 +14,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDateTime;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -302,6 +301,86 @@ public class OracleFunctionsTest {
                     0, 0, 0).toDate()));
         } finally {
             Locale.setDefault(def);
+        }
+    }
+
+    @Test
+    public void testTranslate() {
+        assertThat(OracleFunctions.tranlate("SQL*Plus User''s Guide", " */''", "___"), equalTo("SQL_Plus_Users_Guide"));
+    }
+
+    @Test
+    public void testItTranslate() throws Exception {
+        final Statement stmt = con.createStatement();
+        try {
+            stmt.execute("CREATE ALIAS TRANSLATE FOR \"org.guess880.h2_oracle_funcs.OracleFunctions.tranlate\"");
+            ResultSet rs = stmt.executeQuery(
+                    "SELECT " +
+                    " TRANSLATE('SQL*Plus User''s Guide', ' */''', '___')," +
+                    " TRANSLATE('SQL*Plus User''s Guide', '*''', '_')" +
+                    " FROM dual");
+            if (rs.next()) {
+                assertThat(rs.getString(1), equalTo("SQL_Plus_Users_Guide"));
+                assertThat(rs.getString(2), equalTo("SQL_Plus Users Guide"));
+            } else {
+                fail("dual has no record.");
+            }
+        } finally {
+            stmt.close();
+        }
+    }
+
+//    @Test
+//    public void testItTruncDoubleInt() throws Exception {
+//        final Statement stmt = con.createStatement();
+//        try {
+//            stmt.execute("CREATE ALIAS TRUNC FOR \"org.guess880.h2_oracle_funcs.OracleFunctions.trunc\"");
+//            ResultSet rs = stmt.executeQuery("CALL TRUNC(15.79, 1)");
+//            if (rs.next()) {
+//                assertThat(rs.getDouble(1), equalTo(15.7));
+//            } else {
+//                fail("dual has no record.");
+//            }
+//        } finally {
+//            stmt.close();
+//        }
+//    }
+//
+//    @Test
+//    public void testItTruncDouble() throws Exception {
+//        final Statement stmt = con.createStatement();
+//        try {
+//            ResultSet rs = stmt.executeQuery("CALL TRUNC(15.79)");
+//            if (rs.next()) {
+//                assertThat(rs.getDouble(1), equalTo(15.0));
+//            } else {
+//                fail("dual has no record.");
+//            }
+//        } finally {
+//            stmt.close();
+//        }
+//    }
+
+    @Test
+    public void testUnistr() {
+        assertThat(OracleFunctions.unistr("abc\\00e5\\00f1\\00f6"), equalTo("abcåñö"));
+    }
+
+    @Test
+    public void testItUnistr() throws Exception {
+        final Statement stmt = con.createStatement();
+        try {
+            stmt.execute("CREATE ALIAS UNISTR FOR \"org.guess880.h2_oracle_funcs.OracleFunctions.unistr\"");
+            stmt.execute("CREATE TABLE tbl_unistr (S NVARCHAR2)");
+            stmt.execute("INSERT INTO tbl_unistr SELECT * FROM CSVREAD('classpath:/org/guess880/h2_oracle_funcs/unistr.csv')");
+            ResultSet rs = stmt.executeQuery("SELECT UNISTR(s) FROM tbl_unistr");
+            if (rs.next()) {
+                assertThat(rs.getString(1), equalTo("abcåñö"));
+            } else {
+                fail("dual has no record.");
+            }
+        } finally {
+            stmt.close();
         }
     }
 

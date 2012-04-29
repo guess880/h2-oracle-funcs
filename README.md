@@ -15,6 +15,9 @@ H2database user-defined functions that is compatible with functions of Oracle.
 * LAST_DAY
 * MONTHS_BETWEEN
 * NEXT_DAY
+* SESSIONTIMEZONE
+* TRANSLATE
+* UNISTR
 
 ##implemented on h2
 * ABS
@@ -192,7 +195,6 @@ H2database user-defined functions that is compatible with functions of Oracle.
 * ROWIDTOCHAR
 * ROWIDTONCHAR
 * SCN_TO_TIMESTAMP
-* SESSIONTIMEZONE
 * STATS_BINOMIAL_TEST
 * STATS_CROSSTAB
 * STATS_F_TEST
@@ -232,13 +234,11 @@ H2database user-defined functions that is compatible with functions of Oracle.
 * TO_TIMESTAMP
 * TO_TIMESTAMP_TZ
 * TO_YMINTERVAL
-* TRANSLATE
 * TRANSLATE ... USING
 * TREAT
 * TRUNC
 * TZ_OFFSET
 * UID
-* UNISTR
 * UPDATEXML
 * USERENV
 * VALUE
